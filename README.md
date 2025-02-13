@@ -25,20 +25,28 @@ In WebGL mode, you may have noticed that transparent images still occlude other 
   <td>
 
 ```js
-translate(x, y, z);
-imageMode(CENTER);
-image(tex, 0, 0);
+for (const { x, y, z } of items) {
+  push();
+  translate(x, y, z);
+  imageMode(CENTER);
+  image(tex, 0, 0);
+  pop();
+}
 ```
     
   </td>
   <td>
 
 ```js
-translate(x, y, z);
-drawTransparent(() => {
-  imageMode(CENTER);
-  image(tex, 0, 0);
-});
+for (const { x, y, z } of items) {
+  push();
+  translate(x, y, z);
+  drawTransparent(() => {
+    imageMode(CENTER);
+    image(tex, 0, 0);
+  });
+  pop();
+}
 ```
     
   </td>
@@ -67,20 +75,28 @@ drawTransparent(() => {
   <td>
 
 ```js
-translate(x, y, z);
-texture(tex);
-box(100);
+for (const { x, y, z } of items) {
+  push();
+  translate(x, y, z);
+  texture(tex);
+  box(100);
+  pop();
+}
 ```
     
   </td>
   <td>
 
 ```js
-translate(x, y, z);
-drawTwoSided(() => {
-  texture(tex);
-  box(100);
-});
+for (const { x, y, z } of items) {
+  push();
+  translate(x, y, z);
+  drawTwoSided(() => {
+    texture(tex);
+    box(100);
+  });
+  pop();
+}
 ```
     
   </td>
@@ -139,3 +155,5 @@ For objects that have faces that might occlude themselves, the `drawTwoSided` fu
 - **Intersecting items will still have rendering issues.** If you have two transparent items that intersect, neither will be fully in front of the other, so the overlapping regions might have artifacts, such as partial occlusion, and antialiased bits leaving a slight "halo" where it occludes the other item. If you anticipate a lot of this, consider trying to split each item up into many smaller items.
 
   ![image](https://github.com/user-attachments/assets/014b368b-93e3-4656-8686-43715b5369a9)
+
+- **Remember that `drawTransparent()` adds an implicit `push()`/`pop()` around your function.** Since we're rearranging the order of items under the hood, the `push`/`pop` helps make everything more predictable.
