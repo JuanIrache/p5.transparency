@@ -1,0 +1,29 @@
+{
+  "name": "p5.transparency",
+  "version": "0.0.1",
+  "description": "An addon for rendering objects with transparency in p5.js WebGL mode.",
+  "main": "p5.transparency.js",
+  "scripts": {
+    "build": "minify p5.transparency.js > p5.transparency.min.js",
+    "publish": "npm publish --access public"
+  },
+  "types": "p5.transparency.d.ts",
+  "files": [
+    "p5.transparency.js",
+    "p5.transparency.min.js",
+    "p5.transparency.d.ts"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/davepagurek/p5.transparency.git"
+  },
+  "author": "Dave Pagurek",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/davepagurek/p5.transparency/issues"
+  },
+  "homepage": "https://github.com/davepagurek/p5.transparency#readme",
+  "devDependencies": {
+    "minify": "^13.0.0"
+  }
+}
