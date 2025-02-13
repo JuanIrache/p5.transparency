@@ -33,9 +33,18 @@
       this.drawingItem++
       const draw = () => {
         this.renderer._pInst.push()
+        item.currentState.uModelMatrix = item.modelMatrix.copy()
+        item.currentState.uViewMatrix = item.viewMatrix.copy()
         const states = this.renderer.states || this.renderer
-        states.uModelMatrix = item.modelMatrix.copy()
-        states.uViewMatrix = item.viewMatrix.copy()
+        if (!this.renderer.states) {
+          for (const key in item.currentState) {
+            states[key] = item.currentState[key]
+          }
+        } else {
+          for (const key in item.currentState) {
+            states.setValue(key, item.currentState[key])
+          }
+        }
         item.run()
         this.renderer._pInst.pop()
       }
@@ -57,6 +66,14 @@
     
     drawTransparent(cb, { twoSided } = {}) {
       const states = this.renderer.states || this.renderer
+      let currentState
+      if (this.renderer.states) {
+        currentState = { ...this.renderer.states }
+      } else {
+        currentState = this.renderer.push()
+        this.renderer.pop(currentState)
+        currentState = { ...currentState }
+      }
       const modelMatrix = states.uModelMatrix.copy()
       const viewMatrix = states.uViewMatrix.copy()
       const mvMatrix = modelMatrix.copy().mult(viewMatrix)
