@@ -33,8 +33,9 @@
       this.drawingItem++
       const draw = () => {
         this.renderer._pInst.push()
-        item.currentState.uModelMatrix = item.modelMatrix.copy()
-        item.currentState.uViewMatrix = item.viewMatrix.copy()
+        if (item.uModelMatrix) item.currentState.uModelMatrix = item.uModelMatrix.copy()
+        if (item.uViewMatrix) item.currentState.uViewMatrix = item.uViewMatrix.copy()
+        if (item.uMVMatrix) item.currentState.uMVMatrix = item.uMVMatrix.copy()
         const states = this.renderer.states || this.renderer
         if (!this.renderer.states) {
           for (const key in item.currentState) {
@@ -74,16 +75,23 @@
         this.renderer.pop(currentState)
         currentState = { ...currentState }
       }
-      const modelMatrix = states.uModelMatrix.copy()
-      const viewMatrix = states.uViewMatrix.copy()
-      const mvMatrix = modelMatrix.copy().mult(viewMatrix)
-      const world = mvMatrix.multiplyPoint(new p5.Vector(0, 0, 0))
+      let uModelMatrix, uViewMatrix, uMVMatrix
+      if (states.uModelMatrix) {
+        uModelMatrix = states.uModelMatrix.copy()
+        uViewMatrix = states.uViewMatrix.copy()
+        uMVMatrix = uModelMatrix.copy().mult(uViewMatrix)
+      } else {
+        uMVMatrix = states.uMVMatrix.copy()
+      }
+      const world = uMVMatrix.multiplyPoint(new p5.Vector(0, 0, 0))
       const item = {
         run: cb,
         z: world.z,
-        modelMatrix,
-        viewMatrix,
+        uModelMatrix,
+        uViewMatrix,
+        uMVMatrix,
         twoSided,
+        currentState,
       }
       this.queues[this.queues.length - 1].push(item)
     }
