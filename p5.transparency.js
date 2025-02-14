@@ -114,6 +114,7 @@
     { method: 'loadPixels', onClass: p5 },
     { method: 'get', onClass: p5 },
     { method: 'redraw', onClass: p5, after: true },
+    { method: '_clearClip', onClass: p5.RendererGL },
   ]
   for (const { method, onClass, after, condition } of boundaries) {
     const oldMethod = onClass.prototype[method]
@@ -163,15 +164,27 @@
       )
     }
   }
-
+  
+  const prevBeginClip = p5.RendererGL.prototype.beginClip
+  p5.RendererGL.prototype.beginClip = function(options) {
+    this._drawingClipMask = true
+    prevBeginClip.call(this, options)
+  }
+  
+  const prevEndClip = p5.RendererGL.prototype.endClip
+  p5.RendererGL.prototype.endClip = function() {
+    this._drawingClipMask = false
+    prevEndClip.call(this)
+  }
+  
   if (p5.Shader.prototype._setMatrixUniforms) {
     const oldSetMatrixUniforms = p5.Shader.prototype._setMatrixUniforms
     p5.Shader.prototype._setMatrixUniforms = function() {
-      this.setUniform('isClipping', this._renderer.drawTarget()._isClipApplied)
+      this.setUniform('isClipping', !!this._renderer._drawingClipMask)
       oldSetMatrixUniforms.call(this)
     }
   }
-
+  
   if (p5.RendererGL.prototype._setGlobalUniforms) {
     const oldSetGlobalUniforms = p5.Shader.prototype._setGlobalUniforms
     p5.Shader.prototype._setGlobalUniforms = function(s) {
