@@ -17,7 +17,7 @@
     flushQueue() {
       const queue = this.queues[this.queues.length - 1]
       if (queue.length === 0) return
-      queue.sort((a, b) => b.z < a.z)
+      queue.sort((a, b) => a.z - b.z)
       while (queue.length > 0) {
         this.drawOrderedItem(queue.shift())
       }
