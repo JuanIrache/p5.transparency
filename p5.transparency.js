@@ -156,11 +156,27 @@
         fragSrc.replace(
           /(OUT_COLOR|gl_FragColor)\s*=\s*([^;]|\n)+;/m,
           `$&
-  if ($1.a <= 0.) discard;
+  if (!isClipping && $1.a <= 0.) discard;
   `
-        ),
+        ).replace('void main', 'uniform bool isClipping;\nvoid main'),
         ...rest
       )
+    }
+  }
+
+  if (p5.Shader.prototype._setMatrixUniforms) {
+    const oldSetMatrixUniforms = p5.Shader.prototype._setMatrixUniforms
+    p5.Shader.prototype._setMatrixUniforms = function() {
+      this.setUniform('isClipping', this._renderer.drawTarget()._isClipApplied)
+      oldSetMatrixUniforms.call(this)
+    }
+  }
+
+  if (p5.RendererGL.prototype._setGlobalUniforms) {
+    const oldSetGlobalUniforms = p5.Shader.prototype._setGlobalUniforms
+    p5.Shader.prototype._setGlobalUniforms = function(s) {
+      this.setUniform('isClipping', this.drawTarget()._isClipApplied)
+      oldSetGlobalUniforms.call(this, s)
     }
   }
 

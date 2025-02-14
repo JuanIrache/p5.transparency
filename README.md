@@ -109,12 +109,12 @@ for (const { x, y, z } of items) {
 Via a script tag:
 
 ```html
-<script src="https://cdn.jsdelivr.net/npm/p5.transparency@0.0.7/p5.transparency.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/p5.transparency@0.0.8/p5.transparency.min.js"></script>
 ```
 
 On OpenProcessing, paste this link into a new library slot:
 ```
-https://cdn.jsdelivr.net/npm/p5.transparency@0.0.7/p5.transparency.min.js
+https://cdn.jsdelivr.net/npm/p5.transparency@0.0.8/p5.transparency.min.js
 ```
 
 ## Usage
