@@ -33,18 +33,26 @@
       this.drawingItem++
       const draw = () => {
         this.renderer._pInst.push()
-        if (item.uModelMatrix) item.currentState.uModelMatrix = item.uModelMatrix.copy()
-        if (item.uViewMatrix) item.currentState.uViewMatrix = item.uViewMatrix.copy()
-        if (item.uMVMatrix) item.currentState.uMVMatrix = item.uMVMatrix.copy()
         const states = this.renderer.states || this.renderer
         if (!this.renderer.states) {
           for (const key in item.currentState) {
             states[key] = item.currentState[key]
+            if (item.currentState[key] instanceof Array) {
+              states[key] = states[key].slice()
+            }
           }
+          if (item.uModelMatrix) states.uModelMatrix = item.uModelMatrix.copy()
+          if (item.uViewMatrix) states.uViewMatrix = item.uViewMatrix.copy()
+          if (item.uMVMatrix) states.uMVMatrix = item.uMVMatrix.copy()
+          if (item.uPMatrix) states.uPMatrix = item.uPMatrix.copy()
         } else {
           for (const key in item.currentState) {
             states.setValue(key, item.currentState[key])
           }
+          if (item.uModelMatrix) states.setValue('uModelMatrix', item.uModelMatrix.copy())
+          if (item.uViewMatrix) states.setValue('uViewMatrix', item.uViewMatrix.copy())
+          if (item.uMVMatrix) states.setValue('uMVMatrix', item.uMVMatrix.copy())
+          if (item.uPMatrix) states.setValue('uPMatrix', item.uPMatrix.copy())
         }
         item.run()
         this.renderer._pInst.pop()
@@ -73,7 +81,7 @@
       } else {
         currentState = this.renderer.push()
         this.renderer.pop(currentState)
-        currentState = { ...currentState }
+        currentState = { ...currentState.properties }
       }
       let uModelMatrix, uViewMatrix, uMVMatrix
       if (states.uModelMatrix) {
@@ -83,6 +91,7 @@
       } else {
         uMVMatrix = states.uMVMatrix.copy()
       }
+      const uPMatrix = states.uPMatrix.copy()
       const world = uMVMatrix.multiplyPoint(new p5.Vector(0, 0, 0))
       const item = {
         run: cb,
@@ -90,6 +99,7 @@
         uModelMatrix,
         uViewMatrix,
         uMVMatrix,
+        uPMatrix,
         twoSided,
         currentState,
       }
@@ -103,13 +113,6 @@
     { method: 'get', onClass: p5.Framebuffer },
     { method: 'loadPixels', onClass: p5 },
     { method: 'get', onClass: p5 },
-    { method: 'camera', onClass: p5.Camera, condition: (cam) => cam._isActive() },
-    ...['camera', 'setPosition', 'move', 'slerp', 'lookAt', 'tilt', 'pan', 'roll', 'set'].map((method) => ({
-      method,
-      onClass: p5.Camera,
-      condition: (cam) => cam._isActive(),
-    })),
-    { method: 'setCamera', onClass: p5 },
     { method: 'redraw', onClass: p5, after: true },
   ]
   for (const { method, onClass, after, condition } of boundaries) {
