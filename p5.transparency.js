@@ -18,13 +18,12 @@
       const queue = this.queues[this.queues.length - 1]
       if (queue.length === 0) return
       queue.sort((a, b) => a.z - b.z)
-      while (queue.length > 0) {
+      while (queue.length > 0 && queue[0].drawingItem >= this.drawingItem) {
         this.drawOrderedItem(queue.shift())
       }
     }
     
     hitFlushBoundary() {
-      if (this.drawingItem > 0) return
       this.flushQueue()
     }
     
@@ -94,6 +93,7 @@
       const uPMatrix = states.uPMatrix.copy()
       const world = uMVMatrix.multiplyPoint(new p5.Vector(0, 0, 0))
       const item = {
+        drawingItem: this.drawingItem,
         run: cb,
         z: world.z,
         uModelMatrix,
