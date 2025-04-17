@@ -123,8 +123,17 @@
         return oldMethod.apply(this, args)
       }
       if (!after) this.transparencyManager().hitFlushBoundary()
-      const result = oldMethod.apply(this, args)
-      if (after) this.transparencyManager().hitFlushBoundary()
+      let result = oldMethod.apply(this, args)
+      if (after) {
+        if (result instanceof Promise) {
+          result = result.then((val) => {
+            this.transparencyManager().hitFlushBoundary()
+            return val;
+          })
+        } else {
+          this.transparencyManager().hitFlushBoundary()
+        }
+      }
       return result
     }
   }
