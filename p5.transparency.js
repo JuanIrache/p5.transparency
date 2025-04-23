@@ -163,11 +163,9 @@
       super(
         renderer,
         vertSrc,
-        fragSrc.replace(
+        fragSrc.includes('uniform bool isClipping') ? fragSrc : fragSrc.replace(
           /(OUT_COLOR|gl_FragColor)\s*=\s*([^;]|\n)+;/m,
-          `$&
-  if (!isClipping && $1.a <= 0.) discard;
-  `
+          `$& if (!isClipping && $1.a <= 0.) discard;`
         ).replace('void main', 'uniform bool isClipping;\nvoid main'),
         ...rest
       )
