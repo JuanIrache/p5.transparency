@@ -1,4 +1,4 @@
-(function(p5) {
+export default function transparency(p5, fn = p5.prototype) {
   class TransparencyManager {
     constructor(renderer) {
       this.queues = [[]]
@@ -138,7 +138,7 @@
     }
   }
 
-  p5.prototype.transparencyManager = function() {
+  fn.transparencyManager = function() {
     return this._renderer.transparencyManager()
   }
 
@@ -204,18 +204,26 @@
   }
   
   if (p5.RendererGL.prototype._setGlobalUniforms) {
-    const oldSetGlobalUniforms = p5.Shader.prototype._setGlobalUniforms
-    p5.Shader.prototype._setGlobalUniforms = function(s) {
-      this.setUniform('isClipping', this.drawTarget()._isClipApplied)
+    const oldSetGlobalUniforms = p5.RendererGL.prototype._setGlobalUniforms
+    p5.RendererGL.prototype._setGlobalUniforms = function(s) {
+      s.setUniform('isClipping', this._drawingClipMask)
       oldSetGlobalUniforms.call(this, s)
     }
   }
 
-  p5.prototype.drawTransparent = function(cb) {
+  fn.drawTransparent = function(cb) {
     this.transparencyManager().drawTransparent(cb)
   }
 
-  p5.prototype.drawTwoSided = function(cb) {
+  fn.drawTwoSided = function(cb) {
     this.transparencyManager().drawTransparent(cb, { twoSided: true })
   }
-})(p5)
+}
+
+if (typeof p5 !== undefined) {
+  if (p5.registerAddon) {
+    p5.registerAddon(transparency);
+  } else {
+    transparency(p5);
+  }
+}
