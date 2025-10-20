@@ -157,18 +157,29 @@
     return this._renderer.transparencyManager()
   }
 
-  const OldShader = p5.Shader
-  p5.Shader = class Shader extends OldShader {
-    constructor(renderer, vertSrc, fragSrc, ...rest) {
-      super(
-        renderer,
-        vertSrc,
-        fragSrc.includes('uniform bool isClipping') ? fragSrc : fragSrc.replace(
-          /(OUT_COLOR|gl_FragColor)\s*=\s*([^;]|\n)+;/m,
+  if (p5.VERSION.startsWith('2.')) {
+    const oldFragSrc = p5.Shader.prototype.fragSrc
+    p5.Shader.prototype.fragSrc = function() {
+      const fragSrc = oldFragSrc.call(this)
+      return fragSrc.includes('uniform bool isClipping') ? fragSrc : fragSrc.replace(
+          /(OUT_COLOR|gl_FragColor)\s*[\+\-\*\/]?=\s*([^;]|\n)+;/mg,
           `$& if (!isClipping && $1.a <= 0.) discard;`
-        ).replace('void main', 'uniform bool isClipping;\nvoid main'),
-        ...rest
-      )
+        ).replace('void main', 'uniform bool isClipping;\nvoid main')
+    }
+  } else {
+    const OldShader = p5.Shader
+    p5.Shader = class Shader extends OldShader {
+      constructor(renderer, vertSrc, fragSrc, ...rest) {
+        super(
+          renderer,
+          vertSrc,
+          fragSrc.includes('uniform bool isClipping') ? fragSrc : fragSrc.replace(
+            /(OUT_COLOR|gl_FragColor)\s*[\+\-\*\/]?=\s*([^;]|\n)+;/mg,
+            `$& if (!isClipping && $1.a <= 0.) discard;`
+          ).replace('void main', 'uniform bool isClipping;\nvoid main'),
+          ...rest
+        )
+      }
     }
   }
   
